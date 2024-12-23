@@ -1,6 +1,6 @@
 local doof
 
-function postCreate()
+function create()
 	local dialogue = love.filesystem.read(paths.getPath('songs/roses/dialogue.txt')):split('\n')
 
 	doof = DialogueBox(dialogue)
@@ -8,8 +8,6 @@ function postCreate()
 	doof.cameras = {state.camNotes}
 	doof.finishThing = function()
 		state:startCountdown()
-		if state.buttons then state:add(state.buttons) end
-		doof:destroy()
 		close()
 	end
 
@@ -17,11 +15,10 @@ function postCreate()
 	game.camera:shake(0.001, 0.8)
 	state.camHUD:shake(0.001, 0.8)
 
-	Timer():start(1.5, function()
+	Timer.after(1.5, function()
 		util.playSfx(paths.getSound('gameplay/ANGRY'))
 		game.camera:shake(0.001, 0.1)
 		state.camHUD:shake(0.001, 0.1)
 		state:add(doof)
 	end)
-	if state.buttons then state:remove(state.buttons) end
 end

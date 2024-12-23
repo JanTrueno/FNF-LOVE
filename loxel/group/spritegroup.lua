@@ -1,6 +1,5 @@
 ---@class SpriteGroup:Sprite
 local SpriteGroup = Sprite:extend("SpriteGroup")
-local Boundary = loxreq "util.boundary"
 
 function SpriteGroup:new(x, y)
 	SpriteGroup.super.new(self, x, y)
@@ -190,9 +189,6 @@ function SpriteGroup:__render(camera)
 		else
 			member:__render(camera)
 		end
-		Boundary.render(camera, member, i, #list, function(c)
-			return {0, c, 1}
-		end)
 
 		list[i] = nil
 	end
@@ -206,28 +202,11 @@ function SpriteGroup:__render(camera)
 end
 
 function SpriteGroup:_getBoundary()
-	local tx, ty = self.x or 0, self.y or 0
-	if self.offset ~= nil then tx, ty = tx - self.offset.x, ty - self.offset.y end
+	local x, y = self.x or 0, self.y or 0
+	if self.offset ~= nil then x, y = x - self.offset.x, y - self.offset.y end
 
-	local xmin, ymin, xmax, ymax = math.huge, math.huge, -math.huge, -math.huge
-
-	for _, member in ipairs(self.members) do
-		local x, y, w, h, sx, sy = member:_getBoundary()
-
-		x, y = x or 0, y or 0
-		w, h = w or 0, h or 0
-		sx, sy = sx or 1, sy or 1
-
-		local mxmin, mxmax, mymin, mymax = x, x + w, y, y + h
-
-		if mxmin < xmin then xmin = mxmin end
-		if mxmax > xmax then xmax = mxmax end
-		if mymin < ymin then ymin = mymin end
-		if mymax > ymax then ymax = mymax end
-	end
-
-	tx, ty = tx + xmin, ty + ymin
-	return tx, ty, xmax - xmin, ymax - ymin,
+	self:getWidth()
+	return x, y, self.width, self.height,
 		math.abs(self.scale.x * self.zoom.x), math.abs(self.scale.y * self.zoom.y),
 		self.origin.x, self.origin.y
 end
@@ -261,8 +240,6 @@ function SpriteGroup:sort(func) return self.group:sort(func) end
 function SpriteGroup:recycle(class, factory, revive) return self.group:recycle(class, factory, revive) end
 
 function SpriteGroup:clear() self.group:clear() end
-
-function SpriteGroup:focus(f) return self.group:focus(f) end
 
 function SpriteGroup:kill()
 	self.group:kill(); Sprite.super.kill(self)

@@ -1,5 +1,5 @@
 local UserCard = SpriteGroup:extend("UserCard")
-local MediaCard = require "funkin.ui.credits.mediacard"
+local MediaList = require "funkin.ui.credits.medialist"
 
 function UserCard:new(x, y, width, height)
 	UserCard.super.new(self, x, y)
@@ -32,8 +32,7 @@ function UserCard:new(x, y, width, height)
 	self.desc:setScrollFactor()
 	self:add(self.desc)
 
-	self.media = SpriteGroup(0, self.box.y)
-	self.media:setScrollFactor()
+	self.media = MediaList(10, self.box.y)
 	self:add(self.media)
 end
 
@@ -45,40 +44,8 @@ function UserCard:reload(d)
 	self.icon:setGraphicSize(100)
 	self.icon:updateHitbox()
 
-	self:reloadSocials(d)
-	self.box.height = (game.height - 130) - (self.media:getHeight())
-	if #self.media.members > 0 then self.box.height = self.box.height - 10 end
-end
-
-function UserCard:reloadSocials(person)
-	self.media:clear()
-
-	local font = paths.getFont("vcr.ttf", 34)
-
-	local function makeThing(name, icon, i)
-		local img = Sprite(0, 0, paths.getImage("menus/credits/social/" .. icon))
-		img:setGraphicSize(img.width, 42)
-		img:updateHitbox()
-
-		local txt = Marquee(500, 500,
-			self.box.width - 130, 40, name, font)
-		txt.y = img.y + (img.height - txt:getHeight()) / 2
-		txt.antialiasing = false
-
-		local card = MediaCard(0, 72 * i, img, txt, Color.fromRGB(10, 12, 26))
-		card.alpha = 0.4
-		card:setSize(self.box.width, 62)
-		card:setScrollFactor()
-		self.media:add(card)
-	end
-
-	if person.social then
-		for i = #person.social, 1, -1 do
-			local social = person.social[i]
-			makeThing(social.text, social.name:lower(), #person.social - i)
-		end
-	end
-	self.media.y = game.height - self.media:getHeight() - 20
+	self.media:reload(d)
+	self.media:setPosition(10, self.y + game.height - self.media:getHeight() - 40)
 end
 
 return UserCard

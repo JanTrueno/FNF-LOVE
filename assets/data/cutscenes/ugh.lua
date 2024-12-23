@@ -1,58 +1,61 @@
 local bgMusic
 local cutsceneTimer
-local isVideo = ClientPrefs.data.lowQuality
 
 function create()
-	if isVideo then return end
-	state.dad.alpha = 0
-	state.camHUD.visible, state.camNotes.visible = false, false
+	cutsceneTimer = Timer.new()
 
-	tankman = Sprite(state.dad.x + 100, state.dad.y)
-	tankman:setFrames(paths.getSparrowAtlas('stages/tank/cutscenes/'
-		.. paths.formatToSongPath(PlayState.SONG.song)))
-	tankman:addAnimByPrefix('wellWell', 'TANK TALK 1 P1', 24, false)
-	tankman:addAnimByPrefix('killYou', 'TANK TALK 1 P2', 24, false)
-	tankman:play('wellWell', true)
-	table.insert(state.members, table.find(state.members, state.dad) + 1, tankman)
+    state.dad.alpha = 0
+    state.camHUD.visible, state.camNotes.visible = false, false
 
-	state.camFollow:set(state.dad.x + 380, state.dad.y + 170)
+    -- Create the tankman sprite at a position relative to the dad's position
+    tankman = Sprite(state.dad.x + 100, state.dad.y )
+
+    -- Set the frames for the tankman sprite using the Sparrow atlas
+    tankman:setFrames(paths.getSparrowAtlas('stages/tank/cutscenes/'
+        .. paths.formatToSongPath(PlayState.SONG.song)))
+
+    -- Add animations by prefix
+    tankman:addAnimByPrefix('wellWell', 'TANK TALK 1 P1', 24, false)
+    tankman:addAnimByPrefix('killYou', 'TANK TALK 1 P2', 24, false)
+
+    -- Play the 'wellWell' animation
+    tankman:play('wellWell', true)
+
+    -- Optional: Set the scale for the tankman sprite
+    tankman:setGraphicSize(350, 500)
+
+    -- Insert tankman into the state after dad (if dad exists)
+    table.insert(state.members, table.find(state.members, state.dad) + 1, tankman)
+
+    -- Set the camera follow position relative to dad
+    state.camFollow:set(state.dad.x + 280, state.dad.y - 0 )
 end
 
+
 function postCreate()
-	if isVideo then
-		local cutscene = Video(0, 0, paths.getVideo("ughCutscene"), true, true)
-		cutscene:setScrollFactor()
-		cutscene.cameras = {state.camOther}
-		cutscene:play()
-		state:add(cutscene)
-		cutscene.onComplete = function()
-			close()
-		end
-		return
-	end
 	bgMusic = Sound():load(paths.getMusic('gameplay/DISTORTO'), 0.5, true, true)
 	bgMusic:play()
 	game.camera.zoom = game.camera.zoom * 1.2
 
-	Timer():start(0.1, function()
+	cutsceneTimer:after(0.1, function()
 		game.sound.play(paths.getSound('gameplay/wellWellWell'), ClientPrefs.data.vocalVolume / 100)
 	end)
 
-	Timer():start(3, function()
+	cutsceneTimer:after(3, function()
 		state.camFollow.x = state.camFollow.x + 650
 		state.camFollow.y = state.camFollow.y + 100
 	end)
 
-	Timer():start(4.5, function()
+	cutsceneTimer:after(4.5, function()
 		state.boyfriend:playAnim('singUP', true)
 		game.sound.play(paths.getSound('gameplay/bfBeep'), ClientPrefs.data.vocalVolume / 100)
 	end)
 
-	Timer():start(5.2, function()
+	cutsceneTimer:after(5.2, function()
 		state.boyfriend:playAnim('idle', true)
 	end)
 
-	Timer():start(6, function()
+	cutsceneTimer:after(6, function()
 		state.camFollow.x = state.camFollow.x - 650
 		state.camFollow.y = state.camFollow.y - 100
 
@@ -62,17 +65,20 @@ function postCreate()
 		game.sound.play(paths.getSound('gameplay/killYou'), ClientPrefs.data.vocalVolume / 100)
 	end)
 
-	Timer():start(12, function()
+	cutsceneTimer:after(12, function()
 		tankman:destroy()
 		state.dad.alpha = 1
 		state.camHUD.visible, state.camNotes.visible = true, true
 
 		local times = PlayState.conductor.crotchet / 1000 * 4.5
-		state.tween:tween(game.camera, {zoom = state.stage.camZoom}, times, {ease = 'quadInOut'})
+		Timer.tween(times, game.camera, {zoom = state.stage.camZoom}, 'in-out-quad')
 		state:startCountdown()
 	end)
 end
 
 function songStart()
-	if not isVideo then bgMusic:stop(); close() end
+	bgMusic:stop()
+	close()
 end
+
+function update(dt) cutsceneTimer:update(dt) end

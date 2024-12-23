@@ -1,5 +1,3 @@
-local BackgroundGirls = require "backgroundgirls"
-
 local bgGirls
 
 function create()

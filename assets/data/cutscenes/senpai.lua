@@ -1,6 +1,6 @@
 local doof, music
 
-function postCreate()
+function create()
 	local dialogue = love.filesystem.read(paths.getPath('songs/senpai/dialogue.txt')):split('\n')
 	local black = Graphic(-100, -100, game.width * 2, game.height * 2, Color.BLACK)
 
@@ -10,8 +10,7 @@ function postCreate()
 	doof:setScrollFactor()
 	doof.cameras = {state.camNotes}
 	doof.finishThing = function()
-		if state.buttons then state:add(state.buttons) end
-		doof:destroy()
+		state:startCountdown()
 		close()
 	end
 
@@ -22,7 +21,7 @@ function postCreate()
 	game.discardTransition()
 
 	for delay = 1, 7 do
-		Timer():start(0.3 * delay, function()
+		Timer.after(0.3 * delay, function()
 			black.alpha = black.alpha - 0.15
 			if black.alpha < 0 then
 				state:remove(black)
@@ -30,8 +29,6 @@ function postCreate()
 			end
 		end)
 	end
-
-	if state.buttons then state:remove(state.buttons) end
 end
 
 function postUpdate(dt)

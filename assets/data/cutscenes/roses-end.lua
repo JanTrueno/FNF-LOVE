@@ -4,15 +4,15 @@ function create()
 	black:setScrollFactor()
 	state:add(black)
 
-	Timer():start(0.5, function()
+	Timer.after(0.5, function()
 		state.camFollow:set(state.dad.x + 140, state.dad.y + 40)
 		state.camZooming = false
-		Tween.tween(game.camera, {zoom = 1.5}, 1.5, {ease = Ease.quadInOut})
+		Timer.tween(1.5, game.camera, {zoom = 1.5}, 'in-out-quad')
 		state.camHUD.visible, state.camNotes.visible = false, false
 		for delay = 1, 7 do
-			Timer():start(0.3 * delay, function() black.alpha = black.alpha + 0.15 end)
+			Timer.after(0.3 * delay, function() black.alpha = black.alpha + 0.15 end)
 		end
 	end)
 
-	Timer():start(3, function() close() end)
+	Timer.after(3, function() state:endSong(true) end)
 end

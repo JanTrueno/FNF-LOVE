@@ -1,5 +1,6 @@
 return {
 	DEBUG_MODE = true,
+	splashScreen = true,
 
 	title = "Friday Night Funkin' Löve",
 	file = "FNF-LOVE",

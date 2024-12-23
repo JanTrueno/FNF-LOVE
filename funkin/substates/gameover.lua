@@ -14,6 +14,8 @@ GameOverSubstate.resetVars()
 function GameOverSubstate:new(x, y)
 	GameOverSubstate.super.new(self)
 
+	Timer.setSpeed(1)
+
 	self.isFollowing = false
 
 	self.playingDeathSound = false
@@ -22,8 +24,9 @@ function GameOverSubstate:new(x, y)
 	self.followTime = 0.5
 	self._followTime = 0
 
-	self.bg = Graphic(0, 0, game.width * 3, game.height * 3, Color.BLACK)
+	self.bg = Graphic(0, 0, 1, 1, Color.BLACK)
 	self.bg.alpha = 0
+	self.bg.scale.x, self.bg.scale.y = game.width * 3, game.height * 3
 	self.bg:screenCenter()
 	self.bg:updateHitbox()
 	self.bg:setScrollFactor()
@@ -93,9 +96,7 @@ function GameOverSubstate:update(dt)
 			util.playMenuMusic()
 			GameOverSubstate.deaths = 0
 			local state = PlayState.isStoryMode and StoryMenuState or FreeplayState
-			local stickers = Stickers()
-			self:add(stickers)
-			stickers:start(state())
+			self.parent.__stickers:start(state())
 			self.isEnding = true
 		end
 
@@ -106,18 +107,16 @@ function GameOverSubstate:update(dt)
 			self.boyfriend:playAnim('deathConfirm', true)
 			game.sound.music:stop()
 			game.sound.play(paths.getMusic(GameOverSubstate.endSoundName), ClientPrefs.data.musicVolume / 100)
-			Timer():start(0.7, function()
-				Tween.tween(self.boyfriend, {alpha = 0}, 2, {onComplete = function()
+			Timer.after(0.7, function()
+				Timer.tween(2, self.boyfriend, {alpha = 0}, "linear", function()
 					game.resetState()
 					if love.system.getDevice() == "Mobile" then
 						self.buttons:destroy()
 					end
-				end})
+				end)
 			end)
-			Tween.cancelTweensOf(self.bg)
-			Tween.cancelTweensOf(game.camera)
-			Tween.tween(self.bg, {alpha = 1}, 2, {ease = 'cubeOut'})
-			Tween.tween(game.camera, {zoom = 0.9}, 2, {ease = "cubeOut"})
+			Timer.tween(2, self.bg, {alpha = 1}, 'out-sine')
+			Timer.tween(2, game.camera, {zoom = 0.9}, "out-cubic")
 		end
 	end
 
@@ -128,15 +127,13 @@ function GameOverSubstate:update(dt)
 
 			self.isFollowing = true
 			game.camera:follow(self.camFollow, nil, 2.4)
-			Tween.cancelTweensOf(self.bg)
-			Tween.cancelTweensOf(game.camera)
-			Tween.tween(self.bg, {alpha = 0.7}, 1, {ease = 'cubeOut'})
-			Tween.tween(game.camera, {zoom = 1.1}, 1, {ease = "cubeOut"})
+			Timer.tween(1, self.bg, {alpha = 0.7}, 'in-out-sine')
+			Timer.tween(1, game.camera, {zoom = 1.1}, "in-out-cubic")
 
 			local lose, par = self.lose, self.parent
 			if par and lose then
 				lose.cameras = {self.parent.camOther}
-				Timer():start(1 - self.followTime, function()
+				Timer.after(1 - self.followTime, function()
 					if self.parent ~= par then return end
 					lose:play('lose')
 					self:add(lose)

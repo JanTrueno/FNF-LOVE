@@ -1,5 +1,3 @@
-local TankmenBG = require "tankmenbg"
-
 local tankWatchtower
 local tankGround
 local tankAngle = love.math.random(-90, 45)

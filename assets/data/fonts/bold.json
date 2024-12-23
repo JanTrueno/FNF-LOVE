@@ -1,20 +1,26 @@
 {
 	"name": "bold",
-	"offsets": [0, -38],
+	"offsets": [0, 38],
 	"noLower": true,
 
-	"glyphs": {
-		"'": ["-apostraphie-", [0, 48]],
-		"-": ["-dash-", [0, 20]],
-		"&": ["-andpersand-"],
-		",": ["-comma-"],
-		"“": ["-start quote-"],
-		"”": ["-end quote-"],
-		"\"": ["-end quote-"],
-		"!": ["-exclamation point-"],
-		"?": ["-question mark-"],
-		".": ["-period-"],
-		" ": [34],
-		"\t": [74]
-	}
+	"characters": [
+		["'", "-apostraphie-", [0, -40]],
+		["-", "-dash-", [0, -20]],
+		["&", "-andpersand-"],
+		["\\", "-back slash-"],
+		["/", "-foward slash-"],
+		[",", "-comma-"],
+		["“", "-start quote-"],
+		["”", "-end quote-"],
+		["\"", "-end quote-"],
+		[">", "-greater than-"],
+		["<", "-less than-"],
+		["!", "-exclamation point-"],
+		["?", "-question mark-"],
+		[".", "-period-"],
+		["↓", "-down arrow-"],
+		["↑", "-up arrow-"],
+		["→", "-right arrow-"],
+		["←", "-left arrow-"]
+	]
 }

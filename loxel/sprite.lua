@@ -2,16 +2,8 @@ local parseXml = loxreq "lib.xml"
 
 local function sortFramesByIndices(prefix, postfix)
 	local s, e = #prefix + 1, - #postfix - 1
-
 	return function(a, b)
-		local numA = tonumber(string.sub(a.name, s, e))
-		local numB = tonumber(string.sub(b.name, s, e))
-
-		if numA == nil or numB == nil then
-			return a.name < b.name
-		end
-
-		return numA < numB
+		return string.sub(a.name, s, e) < string.sub(b.name, s, e)
 	end
 end
 
@@ -43,9 +35,9 @@ function Sprite.newFrame(name, x, y, w, h, sw, sh, ox, oy, ow, oh)
 		name = name,
 		quad = love.graphics.newQuad(x, y, aw > sw and w - (aw - sw) or w,
 			ah > sh and h - (ah - sh) or h, sw, sh),
-		width = ow or w,
-		height = oh or h,
-		offset = {x = ox or 0, y = oy or 0}
+		width = ow == nil and w or ow,
+		height = oh == nil and h or oh,
+		offset = {x = ox == nil and 0 or ox, y = oy == nil and 0 or oy}
 	}
 end
 
@@ -482,13 +474,15 @@ function Sprite:_canDraw()
 end
 
 function Sprite:__render(camera)
+	local r, g, b, a = love.graphics.getColor()
+	local shader = self.shader and love.graphics.getShader()
+	local blendMode, alphaMode = love.graphics.getBlendMode()
 	local min, mag, anisotropy, mode
 
 	mode = self.antialiasing and "linear" or "nearest"
 	min, mag, anisotropy = self.texture:getFilter()
 	self.texture:setFilter(mode, mode, anisotropy)
 
-	love.graphics.push("all")
 	local f = self:getCurrentFrame()
 
 	local x, y, rad, sx, sy, ox, oy = self.x, self.y, math.rad(self.angle),
@@ -517,9 +511,13 @@ function Sprite:__render(camera)
 	else
 		love.graphics.draw(self.texture, x, y, rad, sx, sy, ox, oy)
 	end
-	love.graphics.pop()
 
 	self.texture:setFilter(min, mag, anisotropy)
+
+	love.graphics.setColor(r, g, b, a)
+	love.graphics.setBlendMode(blendMode, alphaMode)
+	if shader then love.graphics.setShader(shader) end
+	if self.clipRect then love.graphics.setStencilTest() end
 end
 
 return Sprite
